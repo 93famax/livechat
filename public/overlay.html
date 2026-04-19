@@ -189,7 +189,7 @@ socket.on('skip', () => hideCard());
 
 function showLiveChat(data) {
   reset();
-  const author = data.author || 'Anonyme';
+  const author = data.anonymous ? 'Anonyme' : (data.author || 'Anonyme');
 
   if (data.media) {
     const { type, url } = data.media;
@@ -201,19 +201,21 @@ function showLiveChat(data) {
       vid.style.cssText = 'max-width:1920px;max-height:1080px;width:auto;height:auto;object-fit:contain;display:block;background:transparent;';
       vid.onended = () => hideCard();
       mediaEl.appendChild(vid);
-      mediaEl.appendChild(makeAuthorBar(data));
+      if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       if (!data.caption) mediaEl.classList.add('rounded');
       vid.play().catch(() => { vid.muted = true; vid.play(); });
+      vid.oncanplay = () => { if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show')); };
 
     } else if (type === 'image') {
       const img = document.createElement('img');
       img.src = url;
       img.style.cssText = 'max-width:1920px;max-height:1080px;width:auto;height:auto;object-fit:contain;display:block;background:transparent;';
       mediaEl.appendChild(img);
-      mediaEl.appendChild(makeAuthorBar(data));
+      if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       if (!data.caption) mediaEl.classList.add('rounded');
+      img.onload = () => { if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show')); };
 
     } else if (type === 'audio') {
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
@@ -249,7 +251,8 @@ function showLiveChat(data) {
   requestAnimationFrame(() => card.classList.add('show'));
 }
 
-function makeAuthorBar(data) {
+function makeAuthorBar(data, author) {
+  author = author || data.author || 'Anonyme';
   const bar = document.createElement('div');
   bar.className = 'author-bar';
   const av = document.createElement('div');
