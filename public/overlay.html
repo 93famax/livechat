@@ -233,8 +233,6 @@ function showLiveChat(data) {
       currentAudio = new Audio(url);
       currentAudio.volume = 0.85;
       currentAudio.play().catch(() => {});
-      audioName.textContent = author;
-      audioEl.classList.remove('hidden');
     }
   }
 
