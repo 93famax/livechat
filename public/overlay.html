@@ -3,443 +3,231 @@
 <head>
 <meta charset="UTF-8"/>
 <title>LiveChat Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet"/>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-
 html, body {
   width: 1920px;
   height: 1080px;
   background: transparent;
   overflow: hidden;
-  font-family: 'Arial Black', Arial, sans-serif;
+  font-family: 'Inter', Arial, sans-serif;
 }
-
-/* ══════════════════════════════════════
-   OVERLAY LIVECHAT
-══════════════════════════════════════ */
 #lc-wrap {
   position: fixed;
-  bottom: 60px;
+  bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
-  width: 820px;
+  width: 780px;
   z-index: 100;
   pointer-events: none;
 }
-
-/* Card principale */
 #lc-card {
   width: 100%;
-  background: rgba(10, 10, 15, 0.88);
-  border-radius: 20px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow:
-    0 0 0 1.5px rgba(255,255,255,0.10),
-    0 20px 60px rgba(0,0,0,0.75),
-    0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 50px rgba(0,0,0,0.85), 0 0 0 1.5px rgba(255,255,255,0.08);
   opacity: 0;
-  transform: translateY(28px) scale(0.95);
-  transition: opacity 0.38s cubic-bezier(0.34,1.56,0.64,1),
-              transform 0.38s cubic-bezier(0.34,1.56,0.64,1);
+  transform: translateY(20px) scale(0.97);
+  transition: opacity 0.3s cubic-bezier(0.34,1.56,0.64,1), transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
+#lc-card.show { opacity:1; transform:translateY(0) scale(1); }
+#lc-card.hide { opacity:0; transform:translateY(-12px) scale(0.97); transition: opacity 0.25s ease, transform 0.25s ease; }
 
-#lc-card.show {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-#lc-card.hide {
-  opacity: 0;
-  transform: translateY(-18px) scale(0.96);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* Header auteur */
-#lc-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px 10px;
-}
-
-#lc-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
-  object-fit: cover;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #9147ff, #ff6b9d);
-}
-
-#lc-avatar-fallback {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.2);
-  background: linear-gradient(135deg, #9147ff, #ff6b9d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 17px;
-  font-weight: 900;
-  color: white;
-  flex-shrink: 0;
-}
-
-#lc-author {
-  font-size: 15px;
-  font-weight: 900;
-  color: #d4aaff;
-  letter-spacing: 0.3px;
-  flex: 1;
-}
-
-#lc-badge {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 50px;
-  padding: 3px 10px;
-}
-
-/* Zone média */
 #lc-media {
   width: 100%;
-  max-height: 500px;
   background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  border-radius: 16px 16px 0 0;
   overflow: hidden;
 }
-
 #lc-media.hidden { display: none; }
+#lc-media.rounded { border-radius: 16px; }
+#lc-media img, #lc-media video { width:100%; max-height:520px; object-fit:contain; display:block; }
 
-#lc-media img,
-#lc-media video {
-  width: 100%;
-  max-height: 500px;
-  object-fit: contain;
-  display: block;
+.author-bar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+  border-radius: 50px;
+  padding: 5px 14px 5px 5px;
 }
+.author-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.25);
+  object-fit: cover;
+  flex-shrink: 0;
+  background: linear-gradient(135deg,#9147ff,#ff6b9d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: white;
+  overflow: hidden;
+}
+.author-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.author-name { font-size: 13px; font-weight: 700; color: white; }
 
-/* Zone audio */
 #lc-audio {
   padding: 18px 20px;
   display: flex;
   align-items: center;
   gap: 14px;
+  background: rgba(10,10,15,0.92);
+  border-radius: 16px;
 }
-
 #lc-audio.hidden { display: none; }
+.audio-icon { font-size: 28px; animation: beat 0.6s ease-in-out infinite alternate; }
+@keyframes beat { from{transform:scale(1)} to{transform:scale(1.18)} }
+.audio-bar { flex:1; height:4px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; }
+.audio-bar-fill { height:100%; background:linear-gradient(90deg,#9147ff,#ff6b9d); border-radius:4px; animation:wave 1.8s ease-in-out infinite; }
+@keyframes wave { 0%{width:15%} 50%{width:85%} 100%{width:15%} }
+.audio-name { font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); }
 
-.audio-icon {
-  font-size: 32px;
-  animation: beat 0.55s ease-in-out infinite alternate;
-}
-
-@keyframes beat {
-  from { transform: scale(1); }
-  to   { transform: scale(1.2); }
-}
-
-.audio-bar {
-  flex: 1;
-  height: 5px;
-  background: rgba(255,255,255,0.08);
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.audio-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #9147ff, #ff6b9d);
-  border-radius: 5px;
-  animation: audiowave 1.8s ease-in-out infinite;
-}
-
-@keyframes audiowave {
-  0%   { width: 15%; }
-  50%  { width: 85%; }
-  100% { width: 15%; }
-}
-
-/* Caption */
 #lc-caption {
-  padding: 14px 20px 16px;
-  font-size: 20px;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1.35;
-  letter-spacing: 0.2px;
-  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
-  word-break: break-word;
+  padding: 12px 18px 16px;
+  background: rgba(10,10,15,0.92);
+  border-radius: 0 0 16px 16px;
 }
-
 #lc-caption.hidden { display: none; }
-
-/* Barre de progression */
-#lc-progress {
-  height: 3px;
-  background: rgba(255,255,255,0.05);
-}
-
-#lc-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #9147ff, #ff6b9d);
-  transform-origin: left;
-}
-
-/* Séparateur */
-.lc-sep {
-  height: 1px;
-  background: rgba(255,255,255,0.06);
-}
-
-/* ══════════════════════════════════════
-   PANEL PRÉSENCE (qui est connecté)
-══════════════════════════════════════ */
-#presence-panel {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: rgba(10,10,15,0.85);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 12px 16px;
-  min-width: 200px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-  z-index: 200;
-}
-
-#presence-panel.hidden { display: none; }
-
-.presence-title {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: rgba(255,255,255,0.35);
-  margin-bottom: 10px;
-}
-
-.presence-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.presence-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  color: white;
-  animation: popIn 0.25s ease both;
-}
-
-@keyframes popIn {
-  from { opacity:0; transform:translateX(8px); }
-  to   { opacity:1; transform:translateX(0); }
-}
-
-.presence-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #00d4aa;
-  animation: blink 2s infinite;
-  flex-shrink: 0;
-}
-
-@keyframes blink {
-  0%,100% { opacity:1; }
-  50%      { opacity:0.3; }
-}
-
-.presence-empty {
-  font-size: 12px;
-  color: rgba(255,255,255,0.3);
-  font-style: italic;
-}
+#lc-caption.standalone { border-radius: 16px; padding: 18px 22px; }
+.cap-author { font-size: 12px; font-weight: 700; color: #9147ff; margin-bottom: 5px; }
+.cap-text { font-size: 20px; font-weight: 900; color: #fff; line-height: 1.35; word-break: break-word; }
 </style>
 </head>
 <body>
-
-<!-- ── Overlay LiveChat ── -->
 <div id="lc-wrap">
   <div id="lc-card">
-    <div id="lc-header">
-      <img id="lc-avatar" src="" alt="" onerror="this.style.display='none';document.getElementById('lc-avatar-fallback').style.display='flex'"/>
-      <div id="lc-avatar-fallback" style="display:none">?</div>
-      <div id="lc-author">Anonyme</div>
-      <div id="lc-badge">LiveChat</div>
-    </div>
-
-    <div class="lc-sep"></div>
-
-    <div id="lc-media" class="hidden"></div>
-
     <div id="lc-audio" class="hidden">
       <div class="audio-icon">🎵</div>
       <div class="audio-bar"><div class="audio-bar-fill"></div></div>
+      <div class="audio-name" id="lc-audio-name"></div>
     </div>
-
-    <div id="lc-caption" class="hidden"></div>
-    <div id="lc-progress"><div id="lc-bar"></div></div>
-  </div>
-</div>
-
-<!-- ── Panel présence ── -->
-<div id="presence-panel">
-  <div class="presence-title">🟢 Connectés</div>
-  <div class="presence-list" id="presence-list">
-    <div class="presence-empty">Personne</div>
+    <div id="lc-media" class="hidden"></div>
+    <div id="lc-caption" class="hidden">
+      <div class="cap-author" id="cap-author"></div>
+      <div class="cap-text" id="cap-text"></div>
+    </div>
   </div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  // ── Nom du streamer → récupéré depuis l'URL
-  // Ex: https://ton-site.railway.app/?name=famax
-  const params   = new URLSearchParams(window.location.search);
-  const myName   = params.get('name') || 'stream';
+const params = new URLSearchParams(window.location.search);
+const myName = params.get('name') || 'stream';
 
-  const card       = document.getElementById('lc-card');
-  const avatarImg  = document.getElementById('lc-avatar');
-  const avatarFb   = document.getElementById('lc-avatar-fallback');
-  const authorEl   = document.getElementById('lc-author');
-  const mediaEl    = document.getElementById('lc-media');
-  const audioEl    = document.getElementById('lc-audio');
-  const captionEl  = document.getElementById('lc-caption');
-  const bar        = document.getElementById('lc-bar');
-  const presPanel  = document.getElementById('presence-panel');
-  const presList   = document.getElementById('presence-list');
+const card      = document.getElementById('lc-card');
+const mediaEl   = document.getElementById('lc-media');
+const audioEl   = document.getElementById('lc-audio');
+const captionEl = document.getElementById('lc-caption');
+const capAuthor = document.getElementById('cap-author');
+const capText   = document.getElementById('cap-text');
+const audioName = document.getElementById('lc-audio-name');
 
-  let hideTimer  = null;
-  let currentAudio = null;
+let currentAudio = null;
 
-  const socket = io();
+const socket = io();
+socket.on('connect', () => socket.emit('register', myName));
+socket.on('livechat', showLiveChat);
+socket.on('skip', () => hideCard());
 
-  // Annonce au serveur qui on est
-  socket.on('connect', () => {
-    socket.emit('register', myName);
-  });
+function showLiveChat(data) {
+  reset();
+  const author = data.author || 'Anonyme';
 
-  // Mise à jour présence
-  socket.on('presence', (names) => {
-    if (!names || names.length === 0) {
-      presList.innerHTML = '<div class="presence-empty">Personne</div>';
-      return;
-    }
-    presList.innerHTML = names.map(n =>
-      `<div class="presence-item"><div class="presence-dot"></div>${capitalize(n)}</div>`
-    ).join('');
-  });
+  if (data.media) {
+    const { type, url } = data.media;
 
-  // Réception d'un LiveChat
-  socket.on('livechat', (data) => {
-    showLiveChat(data);
-  });
+    if (type === 'video' || type === 'gif') {
+      const vid = document.createElement('video');
+      vid.src = url; vid.autoplay = true; vid.loop = true;
+      vid.muted = false; vid.volume = 0.85; vid.playsInline = true;
+      vid.style.cssText = 'width:100%;max-height:520px;object-fit:contain;display:block;';
+      mediaEl.appendChild(vid);
+      mediaEl.appendChild(makeAuthorBar(data));
+      mediaEl.classList.remove('hidden');
+      if (!data.caption) mediaEl.classList.add('rounded');
+      vid.play().catch(() => { vid.muted = true; vid.play(); });
 
-  function showLiveChat(data) {
-    clearTimeout(hideTimer);
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+    } else if (type === 'image') {
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.cssText = 'width:100%;max-height:520px;object-fit:contain;display:block;';
+      mediaEl.appendChild(img);
+      mediaEl.appendChild(makeAuthorBar(data));
+      mediaEl.classList.remove('hidden');
+      if (!data.caption) mediaEl.classList.add('rounded');
 
-    // Reset
-    card.classList.remove('show', 'hide');
-    mediaEl.innerHTML = '';
-    mediaEl.classList.add('hidden');
-    audioEl.classList.add('hidden');
-    captionEl.classList.add('hidden');
-    avatarImg.style.display = 'block';
-    avatarFb.style.display  = 'none';
-
-    // Auteur
-    authorEl.textContent = data.author || 'Anonyme';
-    avatarFb.textContent = (data.author || '?').charAt(0).toUpperCase();
-
-    if (data.avatarUrl) {
-      avatarImg.src = data.avatarUrl;
-    } else {
-      avatarImg.style.display = 'none';
-      avatarFb.style.display  = 'flex';
-    }
-
-    const duration = data.duration || 7000;
-
-    // Média
-    if (data.media) {
-      const { type, url } = data.media;
-
-      if (type === 'video' || type === 'gif') {
-        const vid = document.createElement('video');
-        vid.src = url;
-        vid.autoplay = true;
-        vid.loop = true;
-        vid.muted = false;
-        vid.volume = 0.85;
-        vid.playsInline = true;
-        vid.style.cssText = 'width:100%;max-height:500px;object-fit:contain;display:block;';
-        mediaEl.appendChild(vid);
-        mediaEl.classList.remove('hidden');
-        vid.play().catch(() => { vid.muted = true; vid.play(); });
-
-      } else if (type === 'image') {
-        const img = document.createElement('img');
-        img.src = url;
-        img.style.cssText = 'width:100%;max-height:500px;object-fit:contain;display:block;';
-        mediaEl.appendChild(img);
-        mediaEl.classList.remove('hidden');
-
-      } else if (type === 'audio') {
-        currentAudio = new Audio(url);
-        currentAudio.volume = 0.85;
-        currentAudio.play().catch(() => {});
-        audioEl.classList.remove('hidden');
-      }
-    }
-
-    // Caption
-    if (data.caption) {
-      captionEl.textContent = data.caption;
-      captionEl.classList.remove('hidden');
-    }
-
-    // Barre de progression
-    bar.style.transition = 'none';
-    bar.style.transform  = 'scaleX(1)';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        bar.style.transition = `transform ${duration}ms linear`;
-        bar.style.transform  = 'scaleX(0)';
-      });
-    });
-
-    // Show
-    requestAnimationFrame(() => card.classList.add('show'));
-
-    // Auto-hide
-    hideTimer = setTimeout(() => {
-      card.classList.remove('show');
-      card.classList.add('hide');
+    } else if (type === 'audio') {
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-      setTimeout(() => {
-        card.classList.remove('hide');
-        mediaEl.innerHTML = '';
-      }, 350);
-    }, duration);
+      currentAudio = new Audio(url);
+      currentAudio.volume = 0.85;
+      currentAudio.play().catch(() => {});
+      audioName.textContent = author;
+      audioEl.classList.remove('hidden');
+    }
   }
 
-  function capitalize(s) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
+  if (data.caption) {
+    capAuthor.textContent = author;
+    capText.textContent = data.caption;
+    captionEl.classList.remove('hidden');
+    if (!data.media) captionEl.classList.add('standalone');
   }
+
+  if (!data.media && !data.caption) return;
+  requestAnimationFrame(() => card.classList.add('show'));
+}
+
+function makeAuthorBar(data) {
+  const bar = document.createElement('div');
+  bar.className = 'author-bar';
+  const av = document.createElement('div');
+  av.className = 'author-avatar';
+  if (data.avatarUrl) {
+    const img = document.createElement('img');
+    img.src = data.avatarUrl;
+    img.onerror = () => { av.textContent = (data.author||'?').charAt(0).toUpperCase(); };
+    av.appendChild(img);
+  } else {
+    av.textContent = (data.author||'?').charAt(0).toUpperCase();
+  }
+  const nm = document.createElement('div');
+  nm.className = 'author-name';
+  nm.textContent = data.author || 'Anonyme';
+  bar.appendChild(av);
+  bar.appendChild(nm);
+  return bar;
+}
+
+function reset() {
+  card.classList.remove('show', 'hide');
+  mediaEl.innerHTML = '';
+  mediaEl.classList.add('hidden');
+  mediaEl.classList.remove('rounded');
+  audioEl.classList.add('hidden');
+  captionEl.classList.add('hidden');
+  captionEl.classList.remove('standalone');
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+}
+
+function hideCard() {
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  card.classList.remove('show');
+  card.classList.add('hide');
+  setTimeout(() => { reset(); }, 300);
+}
 </script>
 </body>
 </html>
