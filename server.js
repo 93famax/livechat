@@ -13,8 +13,23 @@ const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { cors: { origin: '*' } });
 
+// Serve static files from public folder OR root (for flexibility)
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(__dirname));
+
+// Route principale → overlay
+app.get('/', (req, res) => {
+  const publicOverlay = path.join(__dirname, 'public', 'overlay.html');
+  const rootOverlay   = path.join(__dirname, 'overlay.html');
+  const fs = require('fs');
+  if (fs.existsSync(publicOverlay)) {
+    res.sendFile(publicOverlay);
+  } else if (fs.existsSync(rootOverlay)) {
+    res.sendFile(rootOverlay);
+  } else {
+    res.send('<h1>LiveChat actif</h1><p>overlay.html introuvable</p>');
+  }
+});
 
 // ── Qui est connecté : { socketId → streamName } ──
 const connected = {};
