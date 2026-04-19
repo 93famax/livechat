@@ -98,12 +98,17 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  // ── Détection des cibles !nom ──
+  // ── Détection des cibles !nom et !anonyme ──
   const targets = [];
+  let anonymous = false;
   const targetRegex = /!(\w+)/g;
   let match;
   while ((match = targetRegex.exec(content)) !== null) {
-    targets.push(match[1].toLowerCase());
+    if (match[1].toLowerCase() === 'anonyme') {
+      anonymous = true;
+    } else {
+      targets.push(match[1].toLowerCase());
+    }
   }
   const caption = content.replace(/!\w+/g, '').trim() || null;
 
@@ -122,7 +127,7 @@ client.on('messageCreate', async (message) => {
     }
   }
 
-  const payload = { author, avatarUrl, caption, media, duration: DISPLAY_DURATION, targets };
+  const payload = { author, avatarUrl, caption, media, duration: DISPLAY_DURATION, targets, anonymous };
 
   console.log(`📨 ${author} → [${targets.join(',') || 'tous'}] | ${media?.type || 'texte'}`);
 
