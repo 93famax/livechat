@@ -88,13 +88,13 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  // ── Commande /co → liste des connectés (réponse Discord uniquement) ──
+  // ── Commande /co → liste des connectés (dans le channel Discord) ──
   if (content === '/co') {
     const names = Object.values(connected);
     const reply = names.length > 0
-      ? `🟢 Connectés au LiveChat : ${names.map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(', ')}`
+      ? `🟢 Connectés au LiveChat : **${names.map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(', ')}**`
       : '❌ Personne de connecté au LiveChat';
-    try { await message.reply(reply); } catch(e) {}
+    try { await message.channel.send(reply); } catch(e) { console.log('Erreur /co:', e.message); }
     return;
   }
 
