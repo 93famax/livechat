@@ -22,6 +22,12 @@ html, body {
   z-index: 100;
   pointer-events: none;
 }
+#lc-wrap.text-mode {
+  bottom: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
 #lc-card {
   width: 100%;
   border-radius: 16px;
@@ -105,18 +111,23 @@ html, body {
   background: transparent;
   border-radius: 0;
   padding: 0;
+  text-align: center;
+  width: 100%;
 }
 .cap-author { font-size: 12px; font-weight: 700; color: #9147ff; margin-bottom: 5px; }
 .cap-text {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 900;
   color: #fff;
   line-height: 1.35;
   word-break: break-word;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.7);
+  text-shadow: 2px 2px 12px rgba(0,0,0,1), 0 0 30px rgba(0,0,0,0.9);
 }
 #lc-caption.standalone .cap-author { display: none; }
-#lc-caption.standalone .cap-text { font-size: 36px; }
+#lc-caption.standalone .cap-text {
+  font-size: 42px;
+  letter-spacing: 0.5px;
+}
 </style>
 </head>
 <body>
@@ -200,6 +211,15 @@ function showLiveChat(data) {
   }
 
   if (!data.media && !data.caption) return;
+
+  // Mode texte seul → centré au milieu de l'écran
+  const wrap = document.getElementById('lc-wrap');
+  if (!data.media && data.caption) {
+    wrap.classList.add('text-mode');
+  } else {
+    wrap.classList.remove('text-mode');
+  }
+
   requestAnimationFrame(() => card.classList.add('show'));
 }
 
