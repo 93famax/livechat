@@ -81,6 +81,13 @@ client.on('messageCreate', async (message) => {
   const avatarUrl = message.author.displayAvatarURL({ size: 64, extension: 'png' });
   const content   = message.content.trim();
 
+  // ── Commande skip ──
+  if (content === ':skip') {
+    io.emit('skip');
+    console.log(`⏭ ${author} → skip`);
+    return;
+  }
+
   // ── Détection des cibles !nom ──
   const targets = [];
   const targetRegex = /!(\w+)/g;
