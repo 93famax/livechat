@@ -217,7 +217,11 @@ function showLiveChat(data) {
     capAuthor.textContent = author;
     capText.textContent = data.caption;
     captionEl.classList.remove('hidden');
-    if (!data.media) captionEl.classList.add('standalone');
+    if (!data.media) {
+      captionEl.classList.add('standalone');
+    } else {
+      capAuthor.style.display = 'none';
+    }
   }
 
   if (!data.media && !data.caption) return;
@@ -262,6 +266,7 @@ function reset() {
   audioEl.classList.add('hidden');
   captionEl.classList.add('hidden');
   captionEl.classList.remove('standalone');
+  capAuthor.style.display = '';
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
 }
 
