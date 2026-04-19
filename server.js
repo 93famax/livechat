@@ -82,9 +82,19 @@ client.on('messageCreate', async (message) => {
   const content   = message.content.trim();
 
   // ── Commande skip ──
-  if (content === ':skip') {
+  if (content === '!skip') {
     io.emit('skip');
     console.log(`⏭ ${author} → skip`);
+    return;
+  }
+
+  // ── Commande /co → liste des connectés (réponse Discord uniquement) ──
+  if (content === '/co') {
+    const names = Object.values(connected);
+    const reply = names.length > 0
+      ? `🟢 Connectés au LiveChat : ${names.map(n => n.charAt(0).toUpperCase() + n.slice(1)).join(', ')}`
+      : '❌ Personne de connecté au LiveChat';
+    try { await message.reply(reply); } catch(e) {}
     return;
   }
 
