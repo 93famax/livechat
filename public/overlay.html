@@ -222,11 +222,33 @@ const capText   = document.getElementById('cap-text');
 const audioName = document.getElementById('lc-audio-name');
 
 let currentAudio = null;
+let autoHideTimer = null;
+const queue = [];
+let isBusy = false;
 
 const socket = io();
 socket.on('connect', () => socket.emit('register', myName));
-socket.on('livechat', showLiveChat);
-socket.on('skip', () => hideCard());
+socket.on('livechat', (data) => { queue.push(data); tryNext(); });
+socket.on('skip', () => finishCurrent());
+
+function tryNext() {
+  if (isBusy || queue.length === 0) return;
+  isBusy = true;
+  showLiveChat(queue.shift());
+}
+
+function finishCurrent() {
+  if (autoHideTimer) { clearTimeout(autoHideTimer); autoHideTimer = null; }
+  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+  card.classList.remove('show');
+  card.classList.add('hide');
+  setTimeout(() => { reset(); isBusy = false; tryNext(); }, 300);
+}
+
+function scheduleAutoHide(ms) {
+  if (autoHideTimer) clearTimeout(autoHideTimer);
+  autoHideTimer = setTimeout(() => finishCurrent(), ms);
+}
 
 function showLiveChat(data) {
   reset();
@@ -240,7 +262,7 @@ function showLiveChat(data) {
       vid.src = url; vid.autoplay = false; vid.loop = false;
       vid.muted = true; vid.volume = 0.85; vid.playsInline = true;
       vid.style.cssText = 'max-width:1920px;max-height:1080px;width:auto;height:auto;object-fit:contain;display:block;background:transparent;';
-      vid.onended = () => hideCard();
+      vid.onended = () => finishCurrent();
       vid.oncanplaythrough = () => {
         vid.muted = false;
         vid.play().catch(() => {});
@@ -260,7 +282,10 @@ function showLiveChat(data) {
       if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       if (!data.caption) mediaEl.classList.add('rounded');
-      img.onload = () => { if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show')); };
+      img.onload = () => {
+        if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
+        scheduleAutoHide(data.duration || 7000);
+      };
 
     } else if (type === 'audio') {
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
@@ -294,7 +319,10 @@ function showLiveChat(data) {
 
   // Pour image et texte/audio → affiche direct. Pour vidéo → géré par oncanplaythrough
   const isVideo = data.media && (data.media.type === 'video' || data.media.type === 'gif');
-  if (!isVideo) requestAnimationFrame(() => card.classList.add('show'));
+  if (!isVideo) {
+    requestAnimationFrame(() => card.classList.add('show'));
+    scheduleAutoHide(data.duration || 7000);
+  }
 }
 
 function makeAuthorBar(data, author) {
@@ -313,13 +341,14 @@ function makeAuthorBar(data, author) {
   }
   const nm = document.createElement('div');
   nm.className = 'author-name';
-  nm.textContent = data.author || 'Anonyme';
+  nm.textContent = (data.author || 'Anonyme').toUpperCase();
   bar.appendChild(av);
   bar.appendChild(nm);
   return bar;
 }
 
 function reset() {
+  if (autoHideTimer) { clearTimeout(autoHideTimer); autoHideTimer = null; }
   card.classList.remove('show', 'hide');
   mediaEl.innerHTML = '';
   mediaEl.classList.add('hidden');
@@ -331,12 +360,7 @@ function reset() {
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
 }
 
-function hideCard() {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  card.classList.remove('show');
-  card.classList.add('hide');
-  setTimeout(() => { reset(); }, 300);
-}
+// hideCard remplacée par finishCurrent
 </script>
 </body>
 </html>
