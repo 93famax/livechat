@@ -7,7 +7,6 @@ const path = require('path');
 const DISCORD_TOKEN    = process.env.DISCORD_TOKEN;
 const CHANNEL_ID       = process.env.CHANNEL_ID;
 const PORT             = process.env.PORT || 3000;
-const DISPLAY_DURATION = parseInt(process.env.DISPLAY_DURATION || '7000');
 
 const app    = express();
 const server = http.createServer(app);
@@ -127,7 +126,7 @@ client.on('messageCreate', async (message) => {
     }
   }
 
-  const payload = { author, avatarUrl, caption, media, duration: DISPLAY_DURATION, targets, anonymous };
+  const payload = { author, avatarUrl, caption, media, targets, anonymous };
 
   console.log(`📨 ${author} → [${targets.join(',') || 'tous'}] | ${media?.type || 'texte'}`);
 
