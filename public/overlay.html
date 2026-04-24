@@ -316,10 +316,7 @@ function showLiveChat(data) {
 
   // Pour image et texte/audio → affiche direct. Pour vidéo → géré par oncanplaythrough
   const isVideo = data.media && (data.media.type === 'video' || data.media.type === 'gif');
-  if (!isVideo) {
-    requestAnimationFrame(() => card.classList.add('show'));
-    scheduleAutoHide(data.duration || 7000);
-  }
+  if (!isVideo) requestAnimationFrame(() => card.classList.add('show'));
 }
 
 function makeAuthorBar(data, author) {
