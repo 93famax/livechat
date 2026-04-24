@@ -89,27 +89,27 @@ html, body {
 
 .author-bar {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 18px;
+  left: 18px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(0,0,0,0.65);
-  backdrop-filter: blur(8px);
+  gap: 12px;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(10px);
   border-radius: 50px;
-  padding: 5px 14px 5px 5px;
+  padding: 8px 22px 8px 8px;
 }
 .author-avatar {
-  width: 36px;
-  height: 36px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.25);
+  border: 3px solid rgba(255,255,255,0.35);
   flex-shrink: 0;
   background: linear-gradient(135deg,#9147ff,#ff6b9d);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: 22px;
   font-weight: 900;
   color: white;
   overflow: hidden;
@@ -123,7 +123,7 @@ html, body {
   object-fit: cover;
   border-radius: 50%;
 }
-.author-name { font-size: 13px; font-weight: 700; color: white; }
+.author-name { font-size: 22px; font-weight: 700; color: white; }
 
 #lc-audio {
   padding: 18px 20px;
@@ -162,13 +162,27 @@ html, body {
   color: #fff;
   line-height: 1.35;
   word-break: break-word;
-  text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000, 0 0 8px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,1), 0 4px 30px rgba(0,0,0,1);
+  text-shadow:
+    3px 3px 0px #000, -3px -3px 0px #000, 3px -3px 0px #000, -3px 3px 0px #000,
+    3px 0px 0px #000, -3px 0px 0px #000, 0px 3px 0px #000, 0px -3px 0px #000,
+    0 0 12px #000, 0 0 25px #000, 0 0 40px rgba(0,0,0,0.9);
+}
+/* Texte plus grand quand il y a un média (over-media) */
+#lc-caption.over-media .cap-text {
+  font-size: 48px;
+  text-shadow:
+    4px 4px 0px #000, -4px -4px 0px #000, 4px -4px 0px #000, -4px 4px 0px #000,
+    4px 0px 0px #000, -4px 0px 0px #000, 0px 4px 0px #000, 0px -4px 0px #000,
+    0 0 15px #000, 0 0 30px #000, 0 0 50px rgba(0,0,0,0.95);
 }
 #lc-caption.standalone .cap-author { display: none; }
 #lc-caption.standalone .cap-text {
   font-size: 52px;
   letter-spacing: 0.5px;
-  text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000, 0 0 10px rgba(0,0,0,1), 0 0 30px rgba(0,0,0,1), 0 6px 40px rgba(0,0,0,1);
+  text-shadow:
+    4px 4px 0px #000, -4px -4px 0px #000, 4px -4px 0px #000, -4px 4px 0px #000,
+    4px 0px 0px #000, -4px 0px 0px #000, 0px 4px 0px #000, 0px -4px 0px #000,
+    0 0 15px #000, 0 0 35px #000, 0 0 55px rgba(0,0,0,0.95);
 }
 </style>
 </head>
