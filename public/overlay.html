@@ -282,10 +282,7 @@ function showLiveChat(data) {
       if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       if (!data.caption) mediaEl.classList.add('rounded');
-      img.onload = () => {
-        if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
-        scheduleAutoHide(data.duration || 7000);
-      };
+      img.onload = () => { if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show')); };
 
     } else if (type === 'audio') {
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
