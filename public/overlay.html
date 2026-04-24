@@ -40,12 +40,24 @@ html, body {
   opacity: 0;
   transform: translateY(20px) scale(0.97);
   transition: opacity 0.3s cubic-bezier(0.34,1.56,0.64,1), transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
 }
 #lc-wrap.text-mode #lc-card {
   box-shadow: none;
   border-radius: 0;
   overflow: visible;
   width: 1400px;
+}
+/* Quand vidéo plein écran, le caption passe par dessus */
+#lc-caption.over-media {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  background: transparent;
+  padding: 0 40px;
+  z-index: 10;
 }
 #lc-card.show { opacity:1; transform:translateY(0) scale(1); }
 #lc-card.hide { opacity:0; transform:translateY(-12px) scale(0.97); transition: opacity 0.25s ease, transform 0.25s ease; }
@@ -244,6 +256,7 @@ function showLiveChat(data) {
       captionEl.classList.add('standalone');
     } else {
       capAuthor.style.display = 'none';
+      captionEl.classList.add('over-media');
     }
   }
 
@@ -291,7 +304,7 @@ function reset() {
   mediaEl.classList.remove('rounded');
   audioEl.classList.add('hidden');
   captionEl.classList.add('hidden');
-  captionEl.classList.remove('standalone');
+  captionEl.classList.remove('standalone', 'over-media');
   capAuthor.style.display = '';
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
 }
