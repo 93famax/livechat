@@ -93,23 +93,23 @@ html, body {
   left: 18px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: rgba(0,0,0,0.75);
+  gap: 14px;
+  background: rgba(0,0,0,0.80);
   backdrop-filter: blur(10px);
   border-radius: 50px;
-  padding: 8px 22px 8px 8px;
+  padding: 8px 24px 8px 8px;
 }
 .author-avatar {
-  width: 58px;
-  height: 58px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  border: 3px solid rgba(255,255,255,0.35);
+  border: 3px solid rgba(255,255,255,0.4);
   flex-shrink: 0;
   background: linear-gradient(135deg,#9147ff,#ff6b9d);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 900;
   color: white;
   overflow: hidden;
@@ -123,7 +123,7 @@ html, body {
   object-fit: cover;
   border-radius: 50%;
 }
-.author-name { font-size: 22px; font-weight: 700; color: white; }
+.author-name { font-size: 24px; font-weight: 700; color: white; }
 
 #lc-audio {
   padding: 18px 20px;
@@ -157,32 +157,32 @@ html, body {
 }
 .cap-author { font-size: 12px; font-weight: 700; color: #9147ff; margin-bottom: 5px; }
 .cap-text {
-  font-size: 32px;
+  font-size: 38px;
   font-weight: 900;
   color: #fff;
   line-height: 1.35;
   word-break: break-word;
   text-shadow:
-    3px 3px 0px #000, -3px -3px 0px #000, 3px -3px 0px #000, -3px 3px 0px #000,
-    3px 0px 0px #000, -3px 0px 0px #000, 0px 3px 0px #000, 0px -3px 0px #000,
-    0 0 12px #000, 0 0 25px #000, 0 0 40px rgba(0,0,0,0.9);
+    4px 4px 0 #000, -4px -4px 0 #000, 4px -4px 0 #000, -4px 4px 0 #000,
+    4px 0 0 #000, -4px 0 0 #000, 0 4px 0 #000, 0 -4px 0 #000,
+    0 0 16px #000, 0 0 30px #000, 0 0 50px rgba(0,0,0,0.95);
 }
-/* Texte plus grand quand il y a un média (over-media) */
+/* Texte plus grand avec image/video */
 #lc-caption.over-media .cap-text {
-  font-size: 48px;
+  font-size: 52px;
   text-shadow:
-    4px 4px 0px #000, -4px -4px 0px #000, 4px -4px 0px #000, -4px 4px 0px #000,
-    4px 0px 0px #000, -4px 0px 0px #000, 0px 4px 0px #000, 0px -4px 0px #000,
-    0 0 15px #000, 0 0 30px #000, 0 0 50px rgba(0,0,0,0.95);
+    5px 5px 0 #000, -5px -5px 0 #000, 5px -5px 0 #000, -5px 5px 0 #000,
+    5px 0 0 #000, -5px 0 0 #000, 0 5px 0 #000, 0 -5px 0 #000,
+    0 0 20px #000, 0 0 40px #000, 0 0 60px rgba(0,0,0,0.95);
 }
 #lc-caption.standalone .cap-author { display: none; }
 #lc-caption.standalone .cap-text {
-  font-size: 52px;
+  font-size: 58px;
   letter-spacing: 0.5px;
   text-shadow:
-    4px 4px 0px #000, -4px -4px 0px #000, 4px -4px 0px #000, -4px 4px 0px #000,
-    4px 0px 0px #000, -4px 0px 0px #000, 0px 4px 0px #000, 0px -4px 0px #000,
-    0 0 15px #000, 0 0 35px #000, 0 0 55px rgba(0,0,0,0.95);
+    5px 5px 0 #000, -5px -5px 0 #000, 5px -5px 0 #000, -5px 5px 0 #000,
+    5px 0 0 #000, -5px 0 0 #000, 0 5px 0 #000, 0 -5px 0 #000,
+    0 0 20px #000, 0 0 40px #000, 0 0 60px rgba(0,0,0,0.95);
 }
 </style>
 </head>
@@ -216,11 +216,41 @@ const capText   = document.getElementById('cap-text');
 const audioName = document.getElementById('lc-audio-name');
 
 let currentAudio = null;
+const queue = [];
+let isBusy = false;
 
 const socket = io();
 socket.on('connect', () => socket.emit('register', myName));
-socket.on('livechat', showLiveChat);
-socket.on('skip', () => hideCard());
+socket.on('livechat', (data) => {
+  queue.push(data);
+  tryNext();
+});
+socket.on('skip', () => {
+  skipCurrent();
+});
+
+function tryNext() {
+  if (isBusy || queue.length === 0) return;
+  isBusy = true;
+  const data = queue.shift();
+  showLiveChat(data);
+}
+
+function skipCurrent() {
+  hideCard();
+}
+
+function onCurrentEnded() {
+  isBusy = false;
+  tryNext();
+}
+
+let autoHideTimer = null;
+
+function scheduleAutoHide(ms) {
+  if (autoHideTimer) clearTimeout(autoHideTimer);
+  autoHideTimer = setTimeout(() => hideCard(), ms);
+}
 
 function showLiveChat(data) {
   reset();
@@ -234,7 +264,7 @@ function showLiveChat(data) {
       vid.src = url; vid.autoplay = false; vid.loop = false;
       vid.muted = true; vid.volume = 0.85; vid.playsInline = true;
       vid.style.cssText = 'max-width:1920px;max-height:1080px;width:auto;height:auto;object-fit:contain;display:block;background:transparent;';
-      vid.onended = () => hideCard();
+      vid.onended = () => { hideCard(); };
       vid.oncanplaythrough = () => {
         vid.muted = false;
         vid.play().catch(() => {});
@@ -254,7 +284,10 @@ function showLiveChat(data) {
       if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       if (!data.caption) mediaEl.classList.add('rounded');
-      img.onload = () => { if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show')); };
+      img.onload = () => {
+        if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
+        scheduleAutoHide(data.duration || 7000);
+      };
 
     } else if (type === 'audio') {
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
@@ -288,7 +321,10 @@ function showLiveChat(data) {
 
   // Pour image et texte/audio → affiche direct. Pour vidéo → géré par oncanplaythrough
   const isVideo = data.media && (data.media.type === 'video' || data.media.type === 'gif');
-  if (!isVideo) requestAnimationFrame(() => card.classList.add('show'));
+  if (!isVideo) {
+    requestAnimationFrame(() => card.classList.add('show'));
+    if (!data.media || data.media.type !== 'image') scheduleAutoHide(data.duration || 7000);
+  }
 }
 
 function makeAuthorBar(data, author) {
@@ -314,6 +350,7 @@ function makeAuthorBar(data, author) {
 }
 
 function reset() {
+  if (autoHideTimer) { clearTimeout(autoHideTimer); autoHideTimer = null; }
   card.classList.remove('show', 'hide');
   mediaEl.innerHTML = '';
   mediaEl.classList.add('hidden');
@@ -329,7 +366,11 @@ function hideCard() {
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   card.classList.remove('show');
   card.classList.add('hide');
-  setTimeout(() => { reset(); }, 300);
+  setTimeout(() => {
+    reset();
+    isBusy = false;
+    tryNext();
+  }, 300);
 }
 </script>
 </body>
