@@ -252,9 +252,33 @@ function scheduleAutoHide(ms) {
   autoHideTimer = setTimeout(() => finishCurrent(), ms);
 }
 
+// Seuil (en px) à partir duquel on considère que le média occupe toute la hauteur
+// de l'écran (1080) et qu'il n'y a donc plus de place pour le texte en dessous.
+const FULL_HEIGHT_THRESHOLD = 1075;
+
+function isFullHeightMedia(el) {
+  return el.offsetHeight >= FULL_HEIGHT_THRESHOLD;
+}
+
 function showLiveChat(data) {
   reset();
   const author = data.anonymous ? 'Anonyme' : (data.author || 'Anonyme');
+
+  // Applique le caption soit en dessous du média (par défaut), soit en
+  // overlay par dessus le média si celui-ci occupe toute la hauteur (1080px).
+  function placeCaption(overlay) {
+    if (!data.caption) return;
+    capAuthor.textContent = author;
+    capText.textContent = data.caption;
+    captionEl.classList.remove('hidden');
+    if (overlay) {
+      capAuthor.style.display = 'none';
+      captionEl.classList.add('over-media');
+    } else {
+      captionEl.classList.remove('over-media');
+      capAuthor.style.display = '';
+    }
+  }
 
   if (data.media) {
     const { type, url } = data.media;
@@ -268,6 +292,7 @@ function showLiveChat(data) {
       vid.oncanplaythrough = () => {
         vid.muted = false;
         vid.play().catch(() => {});
+        placeCaption(isFullHeightMedia(vid));
         if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
       };
       mediaEl.appendChild(vid);
@@ -284,26 +309,24 @@ function showLiveChat(data) {
       if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       if (!data.caption) mediaEl.classList.add('rounded');
-      img.onload = () => { if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show')); };
+      img.onload = () => {
+        placeCaption(isFullHeightMedia(img));
+        if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
+      };
 
     } else if (type === 'audio') {
       if (currentAudio) { currentAudio.pause(); currentAudio = null; }
       currentAudio = new Audio(url);
       currentAudio.volume = 0.85;
       currentAudio.play().catch(() => {});
+      // Pas de média visuel à proprement parler : le texte reste en dessous.
+      placeCaption(false);
     }
   }
 
-  if (data.caption) {
-    capAuthor.textContent = author;
-    capText.textContent = data.caption;
-    captionEl.classList.remove('hidden');
-    if (!data.media) {
-      captionEl.classList.add('standalone');
-    } else {
-      capAuthor.style.display = 'none';
-      captionEl.classList.add('over-media');
-    }
+  if (!data.media && data.caption) {
+    placeCaption(false);
+    captionEl.classList.add('standalone');
   }
 
   if (!data.media && !data.caption) return;
@@ -316,9 +339,11 @@ function showLiveChat(data) {
     wrap.classList.remove('text-mode');
   }
 
-  // Pour image et texte/audio → affiche direct. Pour vidéo → géré par oncanplaythrough
+  // Pour image et audio → affiche direct. Pour vidéo → géré par oncanplaythrough.
+  // Pour image, on attend aussi onload (géré ci-dessus) avant d'afficher.
   const isVideo = data.media && (data.media.type === 'video' || data.media.type === 'gif');
-  if (!isVideo) requestAnimationFrame(() => card.classList.add('show'));
+  const isImage = data.media && data.media.type === 'image';
+  if (!isVideo && !isImage) requestAnimationFrame(() => card.classList.add('show'));
 }
 
 function makeAuthorBar(data, author) {
