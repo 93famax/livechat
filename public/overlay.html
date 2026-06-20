@@ -84,10 +84,15 @@ html, body {
   border-radius: 16px;
 }
 
-.author-bar {
+/* Ancré au coin de la vidéo/image elle-même : positionné dynamiquement en JS
+   pour chevaucher la bordure réelle du média (qui peut être plus petit que
+   l'écran). Placé hors de #lc-card pour ne pas être rogné par son overflow:hidden. */
+#lc-authorbar-wrap {
   position: absolute;
-  top: 18px;
-  left: 18px;
+  z-index: 20;
+}
+
+.author-bar {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -161,7 +166,7 @@ html, body {
 }
 .cap-author { font-size: 12px; font-weight: 700; color: #9147ff; margin-bottom: 5px; }
 .cap-text {
-  font-size: 32px;
+  font-size: 46px;
   font-weight: 900;
   color: #fff;
   line-height: 1.35;
@@ -173,7 +178,7 @@ html, body {
 }
 /* Texte plus grand quand il y a un média (over-media) */
 #lc-caption.over-media .cap-text {
-  font-size: 48px;
+  font-size: 60px;
   text-shadow:
     4px 4px 0px #000, -4px -4px 0px #000, 4px -4px 0px #000, -4px 4px 0px #000,
     4px 0px 0px #000, -4px 0px 0px #000, 0px 4px 0px #000, 0px -4px 0px #000,
@@ -181,7 +186,7 @@ html, body {
 }
 #lc-caption.standalone .cap-author { display: none; }
 #lc-caption.standalone .cap-text {
-  font-size: 52px;
+  font-size: 64px;
   letter-spacing: 0.5px;
   text-shadow:
     4px 4px 0px #000, -4px -4px 0px #000, 4px -4px 0px #000, -4px 4px 0px #000,
@@ -200,6 +205,7 @@ html, body {
     </div>
     <div id="lc-media" class="hidden"></div>
   </div>
+  <div id="lc-authorbar-wrap"></div>
   <div id="lc-caption" class="hidden">
     <div class="cap-author" id="cap-author"></div>
     <div class="cap-text" id="cap-text"></div>
@@ -217,6 +223,7 @@ const audioEl   = document.getElementById('lc-audio');
 const captionEl = document.getElementById('lc-caption');
 const capAuthor = document.getElementById('cap-author');
 const capText   = document.getElementById('cap-text');
+const authorbarWrap = document.getElementById('lc-authorbar-wrap');
 const audioName = document.getElementById('lc-audio-name');
 
 let currentAudio = null;
@@ -256,6 +263,19 @@ function isFullHeightMedia(el) {
   return el.offsetHeight >= FULL_HEIGHT_THRESHOLD;
 }
 
+// Décale le badge pour qu'il chevauche le coin réel de la vidéo/image
+// (pas le coin de l'écran). Le badge est en dehors de #lc-card pour ne
+// pas être rogné par son overflow:hidden.
+const BADGE_BORDER_OVERLAP = 16;
+
+function positionAuthorBadge() {
+  const wrapEl = document.getElementById('lc-wrap');
+  const mediaRect = mediaEl.getBoundingClientRect();
+  const wrapRect = wrapEl.getBoundingClientRect();
+  authorbarWrap.style.left = (mediaRect.left - wrapRect.left - BADGE_BORDER_OVERLAP) + 'px';
+  authorbarWrap.style.top  = (mediaRect.top  - wrapRect.top  - BADGE_BORDER_OVERLAP) + 'px';
+}
+
 function showLiveChat(data) {
   reset();
   const author = data.anonymous ? 'Anonyme' : (data.author || 'Anonyme');
@@ -288,10 +308,13 @@ function showLiveChat(data) {
         vid.muted = false;
         vid.play().catch(() => {});
         placeCaption(isFullHeightMedia(vid));
+        if (!data.anonymous) {
+          authorbarWrap.appendChild(makeAuthorBar(data, author));
+          positionAuthorBadge();
+        }
         if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
       };
       mediaEl.appendChild(vid);
-      if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       vid.load();
 
@@ -300,10 +323,13 @@ function showLiveChat(data) {
       img.src = url;
       img.style.cssText = 'max-width:1920px;max-height:1080px;width:auto;height:auto;object-fit:contain;display:block;background:transparent;';
       mediaEl.appendChild(img);
-      if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
       img.onload = () => {
         placeCaption(isFullHeightMedia(img));
+        if (!data.anonymous) {
+          authorbarWrap.appendChild(makeAuthorBar(data, author));
+          positionAuthorBadge();
+        }
         if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
       };
 
@@ -366,6 +392,7 @@ function reset() {
   card.classList.remove('show', 'hide');
   mediaEl.innerHTML = '';
   mediaEl.classList.add('hidden');
+  authorbarWrap.innerHTML = '';
   audioEl.classList.add('hidden');
   captionEl.classList.add('hidden');
   captionEl.classList.remove('standalone', 'over-media');
