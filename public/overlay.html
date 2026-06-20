@@ -253,6 +253,8 @@ function finishCurrent() {
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
   card.classList.remove('show');
   card.classList.add('hide');
+  captionEl.classList.add('fade-hide');
+  authorbarWrap.classList.add('fade-hide');
   setTimeout(() => { reset(); isBusy = false; tryNext(); }, 300);
 }
 
@@ -401,7 +403,8 @@ function reset() {
   authorbarWrap.innerHTML = '';
   audioEl.classList.add('hidden');
   captionEl.classList.add('hidden');
-  captionEl.classList.remove('standalone', 'over-media');
+  captionEl.classList.remove('standalone', 'over-media', 'fade-hide');
+  authorbarWrap.classList.remove('fade-hide');
   capAuthor.style.display = 'none';
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
 }
