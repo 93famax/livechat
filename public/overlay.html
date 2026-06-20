@@ -90,7 +90,10 @@ html, body {
 #lc-authorbar-wrap {
   position: absolute;
   z-index: 20;
+  opacity: 1;
+  transition: opacity 0.25s ease;
 }
+#lc-authorbar-wrap.fade-hide { opacity: 0; }
 
 .author-bar {
   display: flex;
@@ -155,7 +158,10 @@ html, body {
   background: transparent;
   border-radius: 0;
   text-align: center;
+  opacity: 1;
+  transition: opacity 0.25s ease;
 }
+#lc-caption.fade-hide { opacity: 0; }
 #lc-caption.hidden { display: none; }
 #lc-caption.standalone {
   background: transparent;
