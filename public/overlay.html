@@ -68,12 +68,11 @@ html, body {
   align-items: center;
   justify-content: center;
   position: relative;
-  border-radius: 16px 16px 0 0;
+  border-radius: 16px;
   overflow: hidden;
   background: transparent;
 }
 #lc-media.hidden { display: none; }
-#lc-media.rounded { border-radius: 16px; }
 #lc-media img, #lc-media video {
   max-width: 1920px;
   max-height: 1080px;
@@ -82,9 +81,6 @@ html, body {
   object-fit: contain;
   display: block;
   background: transparent;
-  border-radius: 16px 16px 0 0;
-}
-#lc-media.rounded img, #lc-media.rounded video {
   border-radius: 16px;
 }
 
@@ -203,10 +199,10 @@ html, body {
       <div class="audio-name" id="lc-audio-name"></div>
     </div>
     <div id="lc-media" class="hidden"></div>
-    <div id="lc-caption" class="hidden">
-      <div class="cap-author" id="cap-author"></div>
-      <div class="cap-text" id="cap-text"></div>
-    </div>
+  </div>
+  <div id="lc-caption" class="hidden">
+    <div class="cap-author" id="cap-author"></div>
+    <div class="cap-text" id="cap-text"></div>
   </div>
 </div>
 
@@ -266,17 +262,16 @@ function showLiveChat(data) {
 
   // Applique le caption soit en dessous du média (par défaut), soit en
   // overlay par dessus le média si celui-ci occupe toute la hauteur (1080px).
+  // Le nom d'auteur n'est jamais affiché sous le texte : juste le texte.
   function placeCaption(overlay) {
     if (!data.caption) return;
-    capAuthor.textContent = author;
     capText.textContent = data.caption;
+    capAuthor.style.display = 'none';
     captionEl.classList.remove('hidden');
     if (overlay) {
-      capAuthor.style.display = 'none';
       captionEl.classList.add('over-media');
     } else {
       captionEl.classList.remove('over-media');
-      capAuthor.style.display = '';
     }
   }
 
@@ -298,7 +293,6 @@ function showLiveChat(data) {
       mediaEl.appendChild(vid);
       if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
-      if (!data.caption) mediaEl.classList.add('rounded');
       vid.load();
 
     } else if (type === 'image') {
@@ -308,7 +302,6 @@ function showLiveChat(data) {
       mediaEl.appendChild(img);
       if (!data.anonymous) mediaEl.appendChild(makeAuthorBar(data, author));
       mediaEl.classList.remove('hidden');
-      if (!data.caption) mediaEl.classList.add('rounded');
       img.onload = () => {
         placeCaption(isFullHeightMedia(img));
         if (!card.classList.contains('show')) requestAnimationFrame(() => card.classList.add('show'));
@@ -373,11 +366,10 @@ function reset() {
   card.classList.remove('show', 'hide');
   mediaEl.innerHTML = '';
   mediaEl.classList.add('hidden');
-  mediaEl.classList.remove('rounded');
   audioEl.classList.add('hidden');
   captionEl.classList.add('hidden');
   captionEl.classList.remove('standalone', 'over-media');
-  capAuthor.style.display = '';
+  capAuthor.style.display = 'none';
   if (currentAudio) { currentAudio.pause(); currentAudio = null; }
 }
 
